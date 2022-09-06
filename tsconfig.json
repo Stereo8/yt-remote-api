@@ -18,7 +18,8 @@
     "outDir": "dist",
 
     /* Type Checking */
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
   "exclude": ["dist", "node_modules"]
 }
