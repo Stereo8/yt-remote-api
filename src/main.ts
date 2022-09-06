@@ -1,4 +1,7 @@
 import express, { Express, Request, Response } from 'express'
+import * as dotenv from 'dotenv'
+
+dotenv.config()
 
 const app = express()
 
@@ -13,6 +16,8 @@ app.post('/player', (req: Request, res: Response) => {
   res.json({ id: newId })
 })
 
-app.listen(12345, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:5000`)
+app.listen(process.env.SERVER_PORT, () => {
+  console.log(
+    `⚡️[server]: Server is running at https://localhost:${process.env.SERVER_PORT}`
+  )
 })
