@@ -5,7 +5,7 @@ dotenv.config()
 
 const app = express()
 
-const players: Array<number> = Array(0)
+const players = [0]
 
 app.use(express.json())
 
