@@ -16,6 +16,7 @@ PlayerRouter.get('/:id', async (req, res) => {
     const player = await Player.findById(id)
     res.json({ player })
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error })
   }
 })
