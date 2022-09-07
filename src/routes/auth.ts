@@ -33,12 +33,12 @@ AuthRouter.post('/register', async (req, res) => {
     {
       algorithm: 'HS384',
     },
-    (error, encoded) => {
+    async (error, encoded) => {
       if (error) {
         res.status(500).json({ error: error }) // TODO: logs
       } else {
         try {
-          newUser.save()
+          await newUser.save()
           res.status(201).json({ token: encoded })
         } catch (error) {
           res.status(409).json({ error })
