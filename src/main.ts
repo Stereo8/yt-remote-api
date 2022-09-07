@@ -5,6 +5,7 @@ import mongoose from 'mongoose'
 import * as dotenv from 'dotenv'
 import { AuthRouter } from './routes/auth'
 import { UserRouter } from './routes/user'
+import wss from './websockets'
 
 dotenv.config()
 
@@ -34,8 +35,10 @@ db.once('connected', () => {
 
 app.use(express.json())
 
-app.listen(process.env.SERVER_PORT, () => {
+const server = app.listen(process.env.SERVER_PORT, () => {
   console.log(
     `⚡️[server]: Server is running at https://localhost:${process.env.SERVER_PORT}`
   )
 })
+
+wss(server)
