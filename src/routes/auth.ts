@@ -22,6 +22,7 @@ AuthRouter.post('/register', async (req, res) => {
   User.findOne({ username: username }, (error, result) => {
     if (!error && result) {
       res.status(409).send('User already exists.')
+      return
     }
   })
 
