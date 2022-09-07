@@ -8,7 +8,7 @@ export default (express: Server) => {
     path: '/websockets',
   })
 
-  let playerConnections: Array<{ id: string; conn: WebSocket }> = []
+  const playerConnections: Map<string, WebSocket> = new Map<string, WebSocket>()
 
   express.on('upgrade', (request, socket, head) => {
     websocketServer.handleUpgrade(request, socket, head, (websocket) => {
@@ -24,6 +24,8 @@ export default (express: Server) => {
 
     if (wsParams?.type && wsParams?.id) {
       if (wsParams.type === 'player') {
+        playerConnections.set(<string>wsParams.id, conn)
+
         conn.on('message', (data) => {
           // TODO: send messages to connected remotes
           console.log(`msg from ${wsParams.id} --- ${data}`)
@@ -31,15 +33,8 @@ export default (express: Server) => {
 
         conn.on('close', (code, reason) => {
           console.log(`ws closed - ${code} - ${reason}`)
-          playerConnections = playerConnections.filter((pc) => {
-            return pc.id !== wsParams.id
-          })
-          console.log(playerConnections)
+          playerConnections.delete(<string>wsParams.id)
         })
-
-        // @ts-ignore
-        playerConnections.push({ id: wsParams.id, conn })
-        console.log(playerConnections)
       }
     }
   })
