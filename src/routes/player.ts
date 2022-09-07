@@ -26,6 +26,7 @@ PlayerRouter.post('/', async (req: Request, res: Response) => {
     await player.save()
     res.status(201).json({ player })
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error })
   }
 })
