@@ -19,13 +19,6 @@ AuthRouter.post('/register', async (req, res) => {
     res.status(400).send('username and password required')
   }
 
-  User.findOne({ username: username }, (error, result) => {
-    if (!error && result) {
-      res.status(409).send('User already exists.')
-      return
-    }
-  })
-
   const passwordHash = await bcrypt.hash(password, 10)
   const newUser = new User({
     username,
@@ -44,8 +37,12 @@ AuthRouter.post('/register', async (req, res) => {
       if (error) {
         res.status(500).json({ error: error }) // TODO: logs
       } else {
-        newUser.save()
-        res.status(201).json({ token: encoded })
+        try {
+          newUser.save()
+          res.status(201).json({ token: encoded })
+        } catch (error) {
+          res.status(409).json({ error })
+        }
       }
     }
   )
