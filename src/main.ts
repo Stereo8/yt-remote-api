@@ -13,7 +13,7 @@ const app = express()
 app.set('trust proxy', 'loopback')
 
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url} ${req.path} from ${req.ip}`)
+  console.log(`${req.method} ${req.url} from ${req.ip}`)
   next()
 })
 
