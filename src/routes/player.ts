@@ -1,6 +1,7 @@
 import { json, Router, Request, Response } from 'express'
 import { Player } from '../model/player'
 import { auth } from '../middleware/auth'
+import { User } from '../model/user'
 
 export const PlayerRouter = Router()
 
@@ -21,8 +22,15 @@ PlayerRouter.get('/:id', async (req, res) => {
 
 PlayerRouter.post('/', async (req: Request, res: Response) => {
   const { name } = req.body
+  // @ts-ignore
+  const { id: userId } = req.user
   const player = new Player({ name, available: false })
   try {
+    const user = await User.findById(userId)
+
+    user.players.push(player)
+
+    await user.save()
     await player.save()
     res.status(201).json({ player })
   } catch (error) {
