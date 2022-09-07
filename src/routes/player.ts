@@ -1,12 +1,15 @@
 import { json, Router, Request, Response } from 'express'
-import { Player } from '~/model/player'
+import { Player } from '../model/player'
+import { auth } from '../middleware/auth'
 
 export const PlayerRouter = Router()
 
 PlayerRouter.use(json())
 
+PlayerRouter.use(auth)
+
 PlayerRouter.get('/:id', async (req, res) => {
-  const { id } = req.body
+  const { id } = req.params
 
   try {
     const player = await Player.findById(id)
@@ -31,6 +34,7 @@ PlayerRouter.put('/:id', async (req, res) => {
   try {
     const player = await Player.findById(req.params.id)
     await Player.updateOne({ _id: req.params.id }, { ...req.body })
+    res.status(204).json(player)
   } catch (error) {
     res.status(500).json({ error })
   }
