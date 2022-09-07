@@ -10,6 +10,12 @@ dotenv.config()
 
 const app = express()
 
+app.set('trust proxy', 'loopback')
+
+app.use((req, res) => {
+  console.log(`${req.method} ${req.url} ${req.path} from ${req.ip}`)
+})
+
 app.use('/player', PlayerRouter)
 app.use('/auth', AuthRouter)
 app.use('/user', UserRouter)
@@ -26,11 +32,6 @@ db.once('connected', () => {
 })
 
 app.use(express.json())
-
-app.get('/player/:id', async (req, res) => {
-  const id = req.params.id
-  res.json(await Player.findById(id))
-})
 
 app.listen(process.env.SERVER_PORT, () => {
   console.log(
