@@ -4,6 +4,7 @@ import { PlayerRouter } from './routes/player'
 import mongoose from 'mongoose'
 import * as dotenv from 'dotenv'
 import { AuthRouter } from './routes/auth'
+import { UserRouter } from './routes/user'
 
 dotenv.config()
 
@@ -11,6 +12,7 @@ const app = express()
 
 app.use('/player', PlayerRouter)
 app.use('/auth', AuthRouter)
+app.use('/user', UserRouter)
 
 const dbConn = mongoose.connect(process.env.DB_URL)
 const db = mongoose.connection
