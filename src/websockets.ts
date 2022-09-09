@@ -41,6 +41,7 @@ function handleRemoteConnection(conn: WebSocket, id: String) {
 
   if (!existingRemotes) {
     conn.close(1001, 'player not found')
+    return
   }
 
   existingRemotes.push(conn)
