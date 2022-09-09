@@ -29,7 +29,7 @@ function handlePlayerConnection(conn: WebSocket, id: String) {
   conn.on('close', (code, reason) => {
     console.log(`ws closed - ${code} - ${reason}`)
     remoteConnections.get(<string>id).forEach((remote) => {
-      remote.close(1001, 'player closed connection')
+      remote.terminate()
     })
     playerConnections.delete(<string>id)
     remoteConnections.delete(<string>id)
