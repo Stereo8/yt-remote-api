@@ -1,14 +1,62 @@
 import ws, { WebSocket } from 'ws'
-import queryString from 'query-string'
+import { parse } from 'query-string'
 import { Server } from 'http'
+
+const playerConnections: Map<string, WebSocket> = new Map<string, WebSocket>()
+const remoteConnections: Map<string, Array<WebSocket>> = new Map<
+  string,
+  Array<WebSocket>
+>()
+
+function handlePlayerConnection(conn: WebSocket, id: String) {
+  playerConnections.set(<string>id, conn)
+
+  if (!remoteConnections.get(<string>id)) {
+    remoteConnections.set(<string>id, new Array<WebSocket>())
+  }
+
+  conn.on('message', (data) => {
+    const connectedRemotes = remoteConnections.get(<string>id)
+    connectedRemotes.forEach((remote) => {
+      remote.send(data.toString())
+    })
+
+    console.log(`msg from player ${id} --- ${data.toString()}`)
+  })
+
+  conn.on('close', (code, reason) => {
+    console.log(`ws closed - ${code} - ${reason}`)
+    remoteConnections.get(<string>id).forEach((remote) => {
+      remote.close(1001, 'player closed connection')
+    })
+    playerConnections.delete(<string>id)
+    remoteConnections.delete(<string>id)
+  })
+}
+
+function handleRemoteConnection(conn: WebSocket, id: String) {
+  const existingRemotes = remoteConnections.get(<string>id)
+  existingRemotes.push(conn)
+
+  conn.on('message', (data) => {
+    console.log(`msg to player ${id} --- ${data.toString()}`)
+    const playerConn = playerConnections.get(<string>id)
+    playerConn.send(data.toString())
+  })
+
+  conn.on('close', (code, reason) => {
+    const index = existingRemotes.indexOf(conn)
+    if (index !== -1) {
+      existingRemotes.splice(index, 1)
+    }
+  })
+}
 
 export default (express: Server) => {
   const websocketServer = new ws.Server({
     noServer: true,
     path: '/websockets',
   })
-
-  const playerConnections: Map<string, WebSocket> = new Map<string, WebSocket>()
 
   express.on('upgrade', (request, socket, head) => {
     websocketServer.handleUpgrade(request, socket, head, (websocket) => {
@@ -18,24 +66,16 @@ export default (express: Server) => {
 
   websocketServer.on('connection', (conn, req) => {
     const [_path, params] = req?.url?.split('?')
-    const wsParams = queryString.parse(params)
+    const wsParams = parse(params)
 
-    console.log(`new conn:\n  id: ${wsParams.id}\n  type: ${wsParams.type}`)
+    const { id, type } = wsParams
 
-    if (wsParams?.type && wsParams?.id) {
-      if (wsParams.type === 'player') {
-        playerConnections.set(<string>wsParams.id, conn)
+    console.log(`new conn:\n  id: ${id}\n  type: ${type}`)
 
-        conn.on('message', (data) => {
-          // TODO: send messages to connected remotes
-          console.log(`msg from ${wsParams.id} --- ${data}`)
-        })
-
-        conn.on('close', (code, reason) => {
-          console.log(`ws closed - ${code} - ${reason}`)
-          playerConnections.delete(<string>wsParams.id)
-        })
-      }
+    if (wsParams.type === 'player') {
+      handlePlayerConnection(conn, <string>id)
+    } else if (wsParams.type === 'remote') {
+      handleRemoteConnection(conn, <string>id)
     }
   })
 
