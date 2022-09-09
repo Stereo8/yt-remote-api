@@ -8,6 +8,8 @@ const remoteConnections: Map<string, Array<WebSocket>> = new Map<
   Array<WebSocket>
 >()
 
+debugger
+
 function handlePlayerConnection(conn: WebSocket, id: String) {
   playerConnections.set(<string>id, conn)
 
@@ -36,7 +38,12 @@ function handlePlayerConnection(conn: WebSocket, id: String) {
 
 function handleRemoteConnection(conn: WebSocket, id: String) {
   const existingRemotes = remoteConnections.get(<string>id)
-  existingRemotes.push(conn)
+
+  if (existingRemotes) {
+    existingRemotes.push(conn)
+  } else {
+    conn.close(1001, 'player not found')
+  }
 
   conn.on('message', (data) => {
     console.log(`msg to player ${id} --- ${data.toString()}`)
