@@ -39,11 +39,11 @@ function handlePlayerConnection(conn: WebSocket, id: String) {
 function handleRemoteConnection(conn: WebSocket, id: String) {
   const existingRemotes = remoteConnections.get(<string>id)
 
-  if (existingRemotes) {
-    existingRemotes.push(conn)
-  } else {
+  if (!existingRemotes) {
     conn.close(1001, 'player not found')
   }
+
+  existingRemotes.push(conn)
 
   conn.on('message', (data) => {
     console.log(`msg to player ${id} --- ${data.toString()}`)
